@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "egw-mail": {
+      "type": "http",
+      "url": "https://ecm.atsrl.net/egw-mail-mcp",
+      "headers": {
+        "Authorization": "Bearer ${EGW_MCP_TOKEN}"
+      }
+    }
+  }
+}
