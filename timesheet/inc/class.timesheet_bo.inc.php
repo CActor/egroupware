@@ -215,18 +215,29 @@ class timesheet_bo extends Api\Storage
 			}
 			$this->status_labels_config[$status_id] = $label;
 		}
+		unset($have);
 		// create required not-to-invoice and invoiced stati
-		foreach(array_keys(array_filter($check_have, static fn($have) => !$have)) as $name)
+		if (($missing = array_keys(array_filter($check_have, static fn($have) => !$have))))
 		{
-			++$status_id;
-			$this->status_labels_config[$status_id] = $this->status_labels[$status_id] =
-				$this->config_data['status_labels'][$status_id] = [
+			// use highest existing id, as the order of the status-labels is not necessarily by id
+			$status_id = $this->status_labels ? max(array_map('intval', array_keys($this->status_labels))) : 0;
+			foreach($missing as $name)
+			{
+				++$status_id;
+				$this->status_labels_config[$status_id] = $this->status_labels[$status_id] = [
 					'name' => $name,
 					'parent' => '',
 					'not_to_invoice' => $name == 'not to invoice',
 					'invoiced' => $name == 'invoiced',
 				];
-			Api\Config::save_value('status_labels', $this->status_labels, 'timesheet');
+			}
+			try {
+				Api\Config::save_value('status_labels', $this->status_labels, 'timesheet');
+			}
+			catch (Api\Db\Exception $e) {
+				// do NOT stop the whole app, if we can not store the stati (eg. "Data too long for column 'config_value'")
+				_egw_log_exception($e);
+			}
 		}
 
 		// Organize into tree structure
@@ -245,6 +256,8 @@ class timesheet_bo extends Api\Storage
 		$tree = $map['']['substatus'];
 
 		// Make nice selectbox labels
+		// (unset the reference first, to not overwrite $this->config_data['status_labels'] with the labels)
+		unset($this->status_labels);
 		$this->status_labels = array();
 		$this->make_status_labels($tree, $this->status_labels);
 
