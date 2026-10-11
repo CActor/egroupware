@@ -1,0 +1,18 @@
+# EGroupware performance monitoring: additional compose file
+#
+# install.sh copies this file next to docker-compose.yml, replaces @PHP_VERSION@
+# and @MONITOR_DIR@, and adds it to COMPOSE_FILE in .env, so a plain
+# "docker compose up -d" keeps using it.
+services:
+  egroupware:
+    # needed by the PHP-FPM slowlog to read the backtrace of a slow worker
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - @MONITOR_DIR@/fpm/zz-egw-monitor.conf:/etc/php/@PHP_VERSION@/fpm/pool.d/zz-egw-monitor.conf:ro
+      - /var/log/egroupware-monitor/fpm:/var/log/egw-monitor
+
+  db:
+    volumes:
+      - @MONITOR_DIR@/mariadb/egw-monitor.cnf:/etc/mysql/conf.d/egw-monitor.cnf:ro
+      - /var/log/egroupware-monitor/mariadb:/var/log/egw-monitor

@@ -1,0 +1,15 @@
+# EGroupware performance monitoring logs (installed as /etc/logrotate.d/egroupware-monitor)
+# copytruncate, as PHP-FPM and MariaDB keep their log files open
+/var/log/egroupware-monitor/fpm/*.log
+/var/log/egroupware-monitor/mariadb/*.log
+/var/log/egroupware-monitor/samples.jsonl
+{
+	daily
+	rotate 30
+	missingok
+	notifempty
+	compress
+	delaycompress
+	copytruncate
+	dateext
+}

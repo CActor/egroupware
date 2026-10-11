@@ -1,0 +1,12 @@
+# EGroupware performance monitoring for MariaDB
+#
+# Mounted as /etc/mysql/conf.d/egw-monitor.cnf in the db container.
+# Only queries slower than long_query_time are written, so normal queries
+# cost nothing. Runtime equivalent without restart:
+#   SET GLOBAL long_query_time=1; SET GLOBAL slow_query_log=1;
+[mariadbd]
+slow_query_log = 1
+slow_query_log_file = /var/log/egw-monitor/mariadb-slow.log
+long_query_time = 1
+# do not log fast queries just because they use no index (too noisy)
+log_queries_not_using_indexes = 0
